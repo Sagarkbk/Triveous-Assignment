@@ -20,11 +20,11 @@ Go to the project directory
 ```bash
   cd Triveous-Assignment
 ```
-Create .env file and Add variables
+Environmental Variables
 
 ```bash
-  DATABASE_URL -> Postgres Database Connection String
-  JWT_SECRET -> Any random secret
+  DATABASE_URL //local postgresql or any other connection string
+  JWT_SECRET  //Any random secret
 ```
 
 Install dependencies
@@ -38,7 +38,7 @@ Prisma
 ```bash
   npx prisma init
   npx prisma migrate dev --name initial_migration
-  npx prisma studio
+  npx prisma studio //Opens Prisma GUI
 ```
 
 Start the server
