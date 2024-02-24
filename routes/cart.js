@@ -12,9 +12,9 @@ const jwtMiddleware = require("../middlewares/jwtMiddleware");
 
 cartRouter.use(jwtMiddleware);
 
-cartRouter.post("/add", async (req, res) => {
-  const productId = parseInt(req.query.productId);
-  const quantity = parseInt(req.query.quantity);
+cartRouter.post("/add/:productId/:quantity", async (req, res) => {
+  const productId = parseInt(req.params.productId);
+  const quantity = parseInt(req.params.quantity);
   const userId = req.userId;
 
   try {
@@ -24,11 +24,16 @@ cartRouter.post("/add", async (req, res) => {
       },
     });
     if (!product) {
-      return res.json("Product doesn't exist");
+      return res
+        .status(404)
+        .json({ message: "Product doesn't exist", success: false });
     }
 
     if (!product.quantity || product.quantity < quantity) {
-      return res.json("Product Sold Out (OR) Less In Stock");
+      return res.status(404).json({
+        message: "Product Sold Out (OR) Low in Stock",
+        success: false,
+      });
     }
 
     const productAlreadyInCart = await prisma.cart.findFirst({
@@ -47,7 +52,7 @@ cartRouter.post("/add", async (req, res) => {
           id: productAlreadyInCart.id,
         },
       });
-      return res.json("Added to Cart!");
+      return res.status(200).json({ message: "Added to Cart!", success: true });
     }
 
     const addToCart = await prisma.cart.create({
@@ -57,15 +62,15 @@ cartRouter.post("/add", async (req, res) => {
         quantity,
       },
     });
-    res.json("Added to Cart!");
+    res.status(200).json({ message: "Added to Cart!", success: true });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 
-cartRouter.delete("/remove", async (req, res) => {
-  const itemId = parseInt(req.query.itemId);
+cartRouter.delete("/remove/:itemId", async (req, res) => {
+  const itemId = parseInt(req.params.itemId);
   const userId = req.userId;
 
   try {
@@ -76,7 +81,10 @@ cartRouter.delete("/remove", async (req, res) => {
     });
 
     if (!inTheCart) {
-      return res.json("Product is not in Cart. So cannot be removed");
+      return res.status(404).json({
+        message: "Product is not in Cart. So cannot be removed",
+        success: false,
+      });
     }
 
     await prisma.cart.delete({
@@ -84,30 +92,36 @@ cartRouter.delete("/remove", async (req, res) => {
         id: itemId,
       },
     });
-    res.json("Product removed from your Cart!");
+    res
+      .status(200)
+      .json({ message: "Product removed from your Cart!", success: true });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 
 cartRouter.get("/view", async (req, res) => {
   const userId = req.userId;
   try {
-    const cartItems = await prisma.cart.findMany();
+    const cartItems = await prisma.cart.findMany({
+      include: {
+        products: true,
+      },
+    });
     if (!cartItems.length) {
-      return res.json("Cart is Empty");
+      return res.status(200).json({ message: "Cart is Empty", success: true });
     }
-    res.json(cartItems);
+    res.status(200).json({ "Saved Products": cartItems, success: true });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 
-cartRouter.put("/update", async (req, res) => {
-  const itemId = parseInt(req.query.itemId);
-  const newQuantity = parseInt(req.query.quantity);
+cartRouter.put("/update/:itemId/:quantity", async (req, res) => {
+  const itemId = parseInt(req.params.itemId);
+  const newQuantity = parseInt(req.params.quantity);
   const userId = req.userId;
 
   try {
@@ -117,7 +131,9 @@ cartRouter.put("/update", async (req, res) => {
       },
     });
     if (!inTheCart) {
-      return res.json("Product is not in the Cart");
+      return res
+        .status(404)
+        .json({ message: "Product is not in the Cart", success: false });
     }
     await prisma.cart.update({
       data: {
@@ -127,10 +143,10 @@ cartRouter.put("/update", async (req, res) => {
         id: itemId,
       },
     });
-    res.json("Updated!");
+    res.status(200).json({ message: "Updated!", success: true });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 

@@ -8,8 +8,8 @@ const prisma = new PrismaClient();
 
 productRouter.use(express.json());
 
-productRouter.get("/searchCategory", async (req, res) => {
-  const categoryId = parseInt(req.query.categoryId);
+productRouter.get("/searchCategory/:categoryId", async (req, res) => {
+  const categoryId = parseInt(req.params.categoryId);
   try {
     const products = await prisma.product.findMany({
       where: {
@@ -18,29 +18,35 @@ productRouter.get("/searchCategory", async (req, res) => {
     });
 
     products.length
-      ? res.json(products)
-      : res.json("No Products under given Category Id");
+      ? res.status(200).json({ products, success: true })
+      : res.status(404).json({
+          message: "No Products under given Category Id",
+          success: false,
+        });
   } catch (err) {
-    console.log(err);
-    res.json(err);
+    // console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
   }
 });
 
-productRouter.get("/searchProduct", async (req, res) => {
-  const id = parseInt(req.query.productId);
+productRouter.get("/searchProduct/:productId", async (req, res) => {
+  const id = parseInt(req.params.productId);
   try {
-    const products = await prisma.product.findMany({
+    const product = await prisma.product.findFirst({
       where: {
         id,
       },
     });
 
-    products.length
-      ? res.json(products)
-      : res.json("No Products under given Category Id");
+    product
+      ? res.status(200).json({ product, success: true })
+      : res.status(404).json({
+          message: "There isn't any Product with that Id",
+          success: false,
+        });
   } catch (err) {
-    console.log(err);
-    res.json(err);
+    // console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
   }
 });
 

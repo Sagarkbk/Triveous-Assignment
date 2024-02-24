@@ -12,8 +12,8 @@ const jwtMiddleware = require("../middlewares/jwtMiddleware");
 
 orderRouter.use(jwtMiddleware);
 
-orderRouter.post("/buy", async (req, res) => {
-  const itemId = parseInt(req.query.itemId);
+orderRouter.post("/buy/:itemId", async (req, res) => {
+  const itemId = parseInt(req.params.itemId);
   const userId = req.userId;
 
   try {
@@ -24,7 +24,9 @@ orderRouter.post("/buy", async (req, res) => {
     });
 
     if (!inTheCart) {
-      return res.json("Product not in the Cart");
+      return res
+        .status(404)
+        .json({ message: "Product not in the Cart", success: true });
     }
 
     const productId = inTheCart.productId;
@@ -39,16 +41,20 @@ orderRouter.post("/buy", async (req, res) => {
     const quantity = inTheCart.quantity;
     const totalPrice = quantity * price;
 
-    await prisma.$transaction([
+    const bought = await prisma.$transaction([
       prisma.order.create({
-        data: { userId, totalPrice, products: { connect: { id: product.id } } },
+        data: { userId, totalPrice },
       }),
-      prisma.cart.delete({ where: { id: itemId } }),
     ]);
-    res.json("Yay, you bought the product!");
+    await prisma.cart.delete({ where: { id: itemId } }),
+      res.status(200).json({
+        message: "Yay, you bought the product!",
+        bought,
+        success: true,
+      });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 
@@ -60,13 +66,15 @@ orderRouter.get("/view", async (req, res) => {
     });
 
     if (!orders.length) {
-      return res.send("No Orders");
+      return res
+        .status(200)
+        .json({ message: "You haven't bought any product yet", success: true });
     }
 
-    res.json(orders);
+    res.status(200).json({ orders, success: true });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 
@@ -78,19 +86,24 @@ orderRouter.get("/history", async (req, res) => {
     });
 
     if (!orders.length) {
-      return res.send("No Orders");
+      return res
+        .status(200)
+        .json({ message: "You haven't bought any product yet", success: true });
     }
 
     const history = [];
 
     for (let order of orders) {
-      history.push({ Product: order.products[0].name, Time: order.createdAt });
+      history.push({
+        id: order.id,
+        Time: order.createdAt.toLocaleString(),
+      });
     }
 
-    res.json({ history });
+    res.status(200).json({ history, success: true });
   } catch (err) {
-    res.json(err);
-    console.log(err);
+    res.status(500).json({ message: "Server Issue", success: false });
+    // console.log(err);
   }
 });
 

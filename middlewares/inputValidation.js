@@ -12,7 +12,7 @@ async function inputValidation(req, res, next) {
 
   if (!result.success) {
     const errs = result.error.issues.map((issue) => issue.message);
-    return res.json({ Errors: errs });
+    return res.status(401).json({ Errors: errs, success: false });
   }
 
   next();

@@ -24,7 +24,9 @@ userRouter.post("/signup", async (req, res) => {
       },
     });
     if (existingUser) {
-      return res.status(409).json({ message: "Email already taken" });
+      return res
+        .status(409)
+        .json({ message: "Email already taken", success: false });
     }
     const newUser = await prisma.user.create({
       data: {
@@ -37,9 +39,13 @@ userRouter.post("/signup", async (req, res) => {
 
     const token = generateJwtToken(userId, userEmail);
 
-    res.status(201).json({ message: "User created", token });
+    res.status(201).json({
+      message: "Account Created Succesfully",
+      success: true,
+      "Authorization Token": token,
+    });
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ Error: "Server Issue", success: false });
   }
 });
 
@@ -55,7 +61,9 @@ userRouter.post("/signin", async (req, res) => {
     });
 
     if (!existingUser) {
-      return res.json({ message: "Account not found" });
+      return res
+        .status(404)
+        .json({ message: "Account not found", success: false });
     }
 
     const userId = existingUser.id;
@@ -63,9 +71,13 @@ userRouter.post("/signin", async (req, res) => {
 
     const token = generateJwtToken(userId, userEmail);
 
-    res.json({ message: "Logged In", token });
+    res.json({
+      message: "You've Successfully Signed In",
+      success: true,
+      "Authorization Token": token,
+    });
   } catch (error) {
-    res.json(error);
+    res.status(500).json({ message: "Server Issue", success: false });
   }
 });
 

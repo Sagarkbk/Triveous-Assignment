@@ -28,13 +28,13 @@ async function jwtMiddleware(req, res, next) {
     });
 
     if (!existingUser) {
-      return res.json({ message: "Invalid User" });
+      return res.status(401).json({ message: "Unauthorized User" });
     }
 
     req.userId = decode.userId;
     next();
   } catch (error) {
-    res.json({ message: "Server Issue" });
+    res.status(500).json({ message: "Server Issue" });
   }
 }
 
