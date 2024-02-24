@@ -2,20 +2,32 @@ const express = require("express");
 
 const cors = require("cors");
 
+const rateLimit = require("express-rate-limit");
+
 const app = express();
 
-const addSeedData = require("./seedData");
+const userRouter = require("./routes/user");
 
-addSeedData();
+const categoryRouter = require("./routes/category");
 
-const loginRouter = require("./routes/login");
+const productRouter = require("./routes/product");
 
-const signUpRouter = require("./routes/signUp");
+const populateDBRouter = require("./routes/populateDB");
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 50,
+  message: "Too many requests from this IP, please try again later.",
+});
+
+app.use(limiter);
 
 app.use(cors());
 
-app.use("/login", loginRouter);
+app.use("/user", userRouter);
 
-app.use("/signUp", signUpRouter);
+app.use("/store/category", categoryRouter);
+
+app.use("/store/product", productRouter);
 
 app.listen(3000);

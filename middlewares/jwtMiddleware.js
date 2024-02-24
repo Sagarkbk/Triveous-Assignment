@@ -31,7 +31,7 @@ async function jwtMiddleware(req, res, next) {
       return res.json({ message: "Invalid User" });
     }
 
-    req.id = decode.userId;
+    req.userId = decode.userId;
     next();
   } catch (error) {
     res.json({ message: "Server Issue" });

@@ -23,14 +23,14 @@ model User{
 
 model Category{
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   description String?
   products Product[]
 }
 
 model Product{
   id Int @id @default(autoincrement())
-  name String @unique
+  name String
   description String
   price Float
   image String?
@@ -56,5 +56,6 @@ model Cart {
   userId      Int
   products    Product @relation(fields: [productId], references: [id])
   productId Int
+  quantity Int
   createdAt   DateTime  @default(now())
 }
