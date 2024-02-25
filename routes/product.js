@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 productRouter.use(express.json());
 
-productRouter.get("/searchCategory/:categoryId", async (req, res) => {
+productRouter.get("/filterByCategory/:categoryId", async (req, res) => {
   const categoryId = parseInt(req.params.categoryId);
   try {
     const products = await prisma.product.findMany({
@@ -29,7 +29,7 @@ productRouter.get("/searchCategory/:categoryId", async (req, res) => {
   }
 });
 
-productRouter.get("/searchProduct/:productId", async (req, res) => {
+productRouter.get("/filterByProduct/:productId", async (req, res) => {
   const id = parseInt(req.params.productId);
   try {
     const product = await prisma.product.findFirst({

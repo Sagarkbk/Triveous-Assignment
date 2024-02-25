@@ -30,4 +30,14 @@ app.use("/store/category", categoryRouter);
 
 app.use("/store/product", productRouter);
 
-app.listen(3000);
+app.get("/test", (req, res) => {
+  res.status(200).send("Working");
+});
+
+require("dotenv").config();
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on PORT ${PORT}`);
+});
