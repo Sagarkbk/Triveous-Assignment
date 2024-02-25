@@ -50,6 +50,11 @@ Start the server
 
 ## API Reference
 
+### Important points:
+##### 1. First, signin or signup. You'll get jwt token.
+##### 2. Add Bearer at the start(Example: Bearer tokenValue). Put it in Headers as Authorization.
+##### 3. Hit the user/populateDB endpoint.
+##### 4. Now you're good to test out any other endpoint.
 ### User Signup
 
 ```http
